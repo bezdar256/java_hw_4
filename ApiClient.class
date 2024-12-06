@@ -1,0 +1,115 @@
+// Source code is decompiled from a .class file using FernFlower decompiler.
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+
+public class ApiClient {
+   public ApiClient() {
+   }
+
+   public static void main(String[] var0) {
+      String var1 = "https://fake-json-api.mock.beeceptor.com/users";
+      String var2 = "https://dummy-json.mock.beeceptor.com/companies";
+      System.out.println("Fetching user data...");
+      fetchDataAndDisplay(var1, "User");
+      System.out.println();
+      System.out.println("Fetching company data...");
+      fetchDataAndDisplay(var2, "Company");
+   }
+
+   private static void fetchDataAndDisplay(String var0, String var1) {
+      HttpURLConnection var2 = null;
+      BufferedReader var3 = null;
+
+      try {
+         PrintStream var10000;
+         String var10001;
+         try {
+            URL var4 = new URL(var0);
+            var2 = (HttpURLConnection)var4.openConnection();
+            var2.setRequestMethod("GET");
+            int var5 = var2.getResponseCode();
+            if (var5 != 200) {
+               var10000 = System.out;
+               var10001 = var1.toLowerCase();
+               var10000.println("\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043f\u043e\u043b\u0443\u0447\u0438\u0442\u044c \u0434\u0430\u043d\u043d\u044b\u0435 " + var10001 + ". \u041a\u043e\u0434 \u043e\u0442\u0432\u0435\u0442\u0430: " + var5);
+               return;
+            }
+
+            var3 = new BufferedReader(new InputStreamReader(var2.getInputStream()));
+            StringBuilder var6 = new StringBuilder();
+
+            String var7;
+            while((var7 = var3.readLine()) != null) {
+               var6.append(var7);
+            }
+
+            parseAndDisplay(var6, var1);
+         } catch (Exception var17) {
+            var10000 = System.out;
+            var10001 = var1.toLowerCase();
+            var10000.println("\u041e\u0448\u0438\u0431\u043a\u0430 \u043f\u0440\u0438 \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u0438 \u0434\u0430\u043d\u043d\u044b\u0445 " + var10001 + ": " + var17.getMessage());
+         }
+      } finally {
+         try {
+            if (var3 != null) {
+               var3.close();
+            }
+         } catch (Exception var16) {
+            System.out.println("\u041e\u0448\u0438\u0431\u043a\u0430 \u043f\u0440\u0438 \u0437\u0430\u043a\u0440\u044b\u0442\u0438\u0438 \u0447\u0442\u0435\u043d\u0438\u044f \u0434\u0430\u043d\u043d\u044b\u0445: " + var16.getMessage());
+         }
+
+         if (var2 != null) {
+            var2.disconnect();
+         }
+
+      }
+
+   }
+
+   private static void parseAndDisplay(StringBuilder var0, String var1) {
+      boolean var2 = false;
+
+      for(int var3 = 0; var3 < var0.length(); ++var3) {
+         char var4 = var0.charAt(var3);
+         if (var4 == '"') {
+            var2 = !var2;
+         } else if (var2 && var4 == ' ') {
+            var0.setCharAt(var3, '_');
+         }
+      }
+
+      String[] var10 = var0.toString().split("\\s+");
+      ArrayList var11 = new ArrayList();
+      String[] var5 = var10;
+      int var6 = var10.length;
+
+      String var8;
+      for(int var7 = 0; var7 < var6; ++var7) {
+         var8 = var5[var7];
+         String var9 = var8.replaceAll("[\\[\\]\",{}]", "").replace("_", " ");
+         if (!var9.isEmpty()) {
+            var11.add(var9);
+         }
+      }
+
+      String var12 = "";
+
+      for(var6 = 0; var6 < var11.size(); var6 += 2) {
+         if (var6 + 1 < var11.size()) {
+            String var13 = (String)var11.get(var6);
+            var8 = (String)var11.get(var6 + 1);
+            if (var13.equals("id:") && !var12.equals("id:")) {
+               System.out.println();
+            }
+
+            System.out.println(var13 + " " + var8);
+            var12 = var13;
+         }
+      }
+
+   }
+}
